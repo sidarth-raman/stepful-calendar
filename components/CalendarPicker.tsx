@@ -15,7 +15,7 @@ const CalendarPicker: React.FC<CalendarPickerProps> = ({ selectedDate, onDateCha
                 inline
                 selected={selectedDate}
                 onChange={onDateChange}
-                dateFormat="MM/dd/yyyy hh:mm"
+                dateFormat="MM/dd/yyyy hh:mm:ss"
                 showTimeSelect
                 timeIntervals={30}
                 timeFormat="hh:mm"
