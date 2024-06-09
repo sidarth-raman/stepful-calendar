@@ -1,11 +1,12 @@
-// db.js
 import mysql from 'mysql2/promise';
+import dotenv from 'dotenv';
+dotenv.config(); // Load environment variables from .env file
 
 const pool = mysql.createPool({
-  host: 'localhost', // Replace with your database host
-  user: 'root', // Replace with your database user
-  password: 's1i2d3raman', // Replace with your database password
-  database: 'stepfulDB', // Replace with your database name
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
   waitForConnections: true,
   connectionLimit: 100,
   queueLimit: 0
