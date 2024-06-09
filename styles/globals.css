@@ -63,7 +63,7 @@ body {
 }
 
 /* Button styles */
-.btn {
+.add-button {
   display: inline-block;
   padding: 10px 20px;
   background-color: #007bff;
@@ -75,7 +75,7 @@ body {
   transition: background-color 0.3s ease;
 }
 
-.btn:hover {
+.add-button:hover {
   background-color: #0056b3;
 }
 
@@ -93,7 +93,7 @@ th, td {
 }
 
 th {
-  background-color: #007bff;
+  background-color: #7896b6;
   color: #fff;
 }
 
