@@ -1,4 +1,33 @@
-# Getting Started with Create React App
+## Tech Stack: 
+
+1. Front-end: React (TypeScript)
+2. Back-end: Next.js
+3. Database: MySQL 
+
+Utilized various libraries, most notably the react-datepicker for the calendar.
+
+
+### Structure:
+
+Pages:
+1. index.tsx - Landing page allowing toggle between 'Coach' and 'Student'
+2. coachPage.tsx - Page that a coach would be able to view, add timings, create Reviews. 
+3. studentPage.tsx - Page that a student would be able to view their bookings and coach data.
+4. /api - All SQL calls lie here. c
+5. components -  A couple larger components, the calendar and reviews options. Also one component, 'rRle' was repeated. 
+ 
+### Note:
+
+Hi Stepful Team, 
+
+I enjoyed doing the 'Coaching Conundrum' take home assignment. I was able to complete most of the user stories
+and tried to keep all of the data organized. I tried staying close to the 3 hour reccommendation and if I had more time
+would have definitley added more product features to make a better fully fledged site. 
+
+I would love to discuss my tech choices, implementation, and improvements for this project. Looking forward to speaking with you!
+
+
+## Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
@@ -31,16 +60,3 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 
 ### `npm run eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
