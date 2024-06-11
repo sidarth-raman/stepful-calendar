@@ -3,46 +3,54 @@ import { table } from 'console';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import CalendarPicker from '../components/CalendarPicker';
+import Role from '../components/Role';
+import LeaveReview from '../components/LeaveReview'
 
 
 const CoachPage: React.FC = () => {
-    const [role, setRole] = useState<string>('');
     const [coaches, setCoaches] = useState([]);
+    const [students, setStudents] = useState([]);
 
     const [selectedCoach, setSelectedCoach] = useState<string>('');
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
+    const [reviews, setReviews] = useState([]);
     const [bookings, setBookings] = useState([]);
     const [filteredAndSortedBookings, setFilteredAndSortedBookings] = useState([]);
+    const [pastBookings, setPastBookings] = useState([]);
 
-     //Navigate between Coach and Student View
-     const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-      const selectedRole = event.target.value;
-      setRole(selectedRole);
-  
-      if (selectedRole === 'coach') {
-        router.push('/coachPage');
-      } else if (selectedRole === 'student') {
-        router.push('/studentPage');
-      }
-    };
+
 
     //Sorts bookings by Date
     useEffect(() => {
-        if (bookings) {
-            const sortedBookings = bookings.sort((a, b) => {
-            const dateA = new Date(a.DateTime).getTime();
-            const dateB = new Date(b.DateTime).getTime();
-            return dateA - dateB;
-            });
-            
-            setFilteredAndSortedBookings(sortedBookings);
-        }
+      if (bookings) {
+        const now = new Date(); 
+    
+        const filteredBookings = bookings.filter(booking => {
+          const bookingDateTime = new Date(booking.DateTime);
+          return bookingDateTime > now && booking.Booked;
+        });
+    
+        const sortedBookings = filteredBookings.sort((a, b) => {
+          const dateA = new Date(a.DateTime).getTime();
+          const dateB = new Date(b.DateTime).getTime();
+          return dateA - dateB;
+        });
+    
+        setFilteredAndSortedBookings(sortedBookings);
+    
+        const pastBookings = bookings.filter(booking => {
+          const bookingDateTime = new Date(booking.DateTime);
+          return bookingDateTime < now;
+        });
+    
+        setPastBookings(pastBookings);
+      }
     }, [selectedCoach, bookings]);
-    const router = useRouter();
-
+  
   //Fetch Coach's Names 
     useEffect(() => {
+      console.log(coaches);
       fetch('/api/coaches', 
         {
           method: 'GET'
@@ -53,23 +61,48 @@ const CoachPage: React.FC = () => {
         .catch(err => console.error('Error fetching users:', err));
     }, []);
 
+     //Fetch Student Data
+     useEffect(() => {
+      fetch('/api/students', 
+        {
+          method: 'GET'
+        }
+      )
+        .then(res => res.json())
+        .then(data => setStudents(data))
+        .catch(err => console.error('Error fetching users:', err));
+    }, []);
+
     //Fetch Coach's Bookings
     useEffect(() => {
+      console.log()
       if (selectedCoach) {
-        const url = `/api/bookings?coach=${selectedCoach}`;
-
-        // Fetch booking data
-        fetch(url)
-            .then(res => {
-                if (!res.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return res.json();
-            })
-            .then(data => setBookings(data))
-            .catch(err => console.error('Error fetching users:', err));
-        }
-    }, [selectedCoach]);
+          // Fetch booking data
+          const bookingsUrl = `/api/bookings?coach=${selectedCoach}`;
+          fetch(bookingsUrl)
+              .then(res => {
+                  if (!res.ok) {
+                      throw new Error('Network response was not ok');
+                  }
+                  return res.json();
+              })
+              .then(data => setBookings(data))
+              .catch(err => console.error('Error fetching bookings:', err));
+  
+          // Fetch coach reviews data
+          const reviewsUrl = `/api/review?coach=${selectedCoach}`;
+          fetch(reviewsUrl)
+              .then(res => {
+                  if (!res.ok) {
+                      throw new Error('Network response was not ok');
+                  }
+                  return res.json();
+              })
+              .then(data => {setReviews(data)})
+              .catch(err => console.error('Error fetching coach reviews:', err));
+      }
+  }, [selectedCoach]);
+  
     
 
     //Change Coach
@@ -95,6 +128,11 @@ const CoachPage: React.FC = () => {
       const seconds = pad(date.getSeconds());
   
       return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  }
+
+  function getStudentPhoneNumber(studentName) {
+    const student = students.find(student => student.name === studentName);
+    return student ? student.phoneNumber : 'N/A';
   }
 
   //Add a Booking
@@ -131,14 +169,7 @@ const CoachPage: React.FC = () => {
         <p>Welcome, Coach!</p>
       </div>
 
-      <div className="role-selection">
-        <label htmlFor="role">Select your role:</label>
-        <select id="role" value={role} onChange={handleChange}>
-          <option value="">--Choose a role--</option>
-          <option value="coach">Coach</option>
-          <option value="student">Student</option>
-        </select>
-      </div>
+      <Role/>
 
       <div className="coach-selection">
         <h2>Select which coach you are:</h2>
@@ -152,7 +183,6 @@ const CoachPage: React.FC = () => {
             <option key={index}>{coach.name}</option>
           ))}
         </select>
-        {selectedCoach && <p>Selected Coach: {selectedCoach}</p>}
       </div>
 
       <CalendarPicker
@@ -165,7 +195,7 @@ const CoachPage: React.FC = () => {
       </button>
 
       <div className="bookings">
-        <h2>Bookings for Coach: {selectedCoach}</h2>
+        <h2>Current Slots for {selectedCoach}</h2>
         <table>
           <thead>
             <tr>
@@ -173,21 +203,23 @@ const CoachPage: React.FC = () => {
               <th>Student</th>
               <th>Date and Time</th>
               <th>Booked</th>
+              <th>Student's Phone Number</th>
             </tr>
           </thead>
           <tbody>
-            {bookings.map((booking, index) => (
-              <tr key={index}>
+          {bookings.map((booking, index) => (
+            <tr key={index}>
                 <td>{booking.Coach}</td>
                 <td>{booking.Student}</td>
                 <td>{booking.DateTime}</td>
                 <td>{booking.Booked ? 'Yes' : 'No'}</td>
-              </tr>
-            ))}
+                <td>{booking.Student !== null ? getStudentPhoneNumber(booking.Student) : ''}</td>
+            </tr>
+          ))}
           </tbody>
         </table>
 
-        <h2>Upcoming bookings for Coach: {selectedCoach}</h2>
+        <h2>Upcoming bookings for {selectedCoach}</h2>
         <table>
           <thead>
             <tr>
@@ -195,19 +227,46 @@ const CoachPage: React.FC = () => {
               <th>Student</th>
               <th>Date</th>
               <th>Booked</th>
+              <th>Student's Phone Number</th>
             </tr>
           </thead>
           <tbody>
-            {filteredAndSortedBookings.map((booking, index) => (
-              <tr key={index}>
+          {filteredAndSortedBookings.map((booking, index) => (
+            <tr key={index}>
                 <td>{booking.Coach}</td>
                 <td>{booking.Student}</td>
                 <td>{booking.DateTime}</td>
                 <td>{booking.Booked ? 'Yes' : 'No'}</td>
-              </tr>
-            ))}
+                <td>{booking.Student !== null ? getStudentPhoneNumber(booking.Student) : ''}</td>
+            </tr>
+          ))}
           </tbody>
         </table>
+        <LeaveReview pastBookings={pastBookings}/>
+        <h2>Reviews</h2>
+        <table>
+        <thead>
+          <tr>
+            <th>Coach</th>
+            <th>Student</th>
+            <th>Date and Time</th>
+            <th>Satisfaction</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {reviews.map((review, index) => (
+            <tr key={index}>
+              <td>{review.Coach}</td>
+              <td>{review.Student}</td>
+              <td>{review.DateTime}</td>
+              <td>{review.Satisfaction}</td>
+              <td>{review.Notes}</td>
+            </tr>
+          ))}
+  </tbody>
+</table>
+
       </div>
     </div>
   );

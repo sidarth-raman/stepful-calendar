@@ -18,20 +18,19 @@ export default async function handler(req, res) {
             res.status(500).json({ message: error.message });
         }
     } else if (req.method === 'GET') {
-      const { coach } = req.query; 
-        try {
-            const [rows] = await pool.query(
-                'SELECT * FROM booking WHERE coach = ?',
-                [coach]
-            );
-
-            // Respond with the retrieved booking data
-            res.status(200).json(rows);
-        } catch (error) {
-            console.error('Database query error:', error);
-            res.status(500).json({ message: error.message });
-        }
-
+        const { coach } = req.query; 
+          try {
+              const [rows] = await pool.query(
+                  'SELECT * FROM booking WHERE coach = ?',
+                  [coach]
+              );
+  
+              // Respond with the retrieved booking data
+              res.status(200).json(rows);
+          } catch (error) {
+              console.error('Database query error:', error);
+              res.status(500).json({ message: error.message });
+          }
     } else {
         res.status(405).json({ message: 'Method not allowed' });
     }

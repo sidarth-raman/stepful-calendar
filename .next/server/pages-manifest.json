@@ -2,7 +2,13 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
+  "/studentPage": "pages/studentPage.js",
+  "/api/coaches": "pages/api/coaches.js",
+  "/api/students": "pages/api/students.js",
+  "/api/bookings": "pages/api/bookings.js",
+  "/api/studentBookings": "pages/api/studentBookings.js",
+  "/api/updateBooking": "pages/api/updateBooking.js",
   "/coachPage": "pages/coachPage.js",
   "/": "pages/index.js",
-  "/api/coaches": "pages/api/coaches.js"
+  "/api/review": "pages/api/review.js"
 }

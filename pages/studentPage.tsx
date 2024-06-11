@@ -1,16 +1,16 @@
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
+import Role from '../components/Role';
 
 const StudentPage: React.FC = () => {
-    const [role, setRole] = useState<string>('');
     const [selectedCoach, setSelectedCoach] = useState<string>('');
     const [selectedStudent, setSelectedStudent] = useState<string>('');
     const [coaches, setCoaches] = useState([]);
     const [students, setStudents] = useState([]);
-    const router = useRouter();
     const [bookings, setBookings] = useState([]);
+    const [studentBookings, setStudentBookings] = useState([]);
 
-
+    //Get Bookings by Coach
     useEffect(() => {
       if (selectedCoach) {
         // Construct URL with query parameter
@@ -26,8 +26,27 @@ const StudentPage: React.FC = () => {
             })
             .then(data => setBookings(data))
             .catch(err => console.error('Error fetching users:', err));
-    }
-}, [selectedCoach]);
+      }
+    }, [selectedCoach]);
+
+    //Get Bookings by Student
+    useEffect(() => {
+      if (selectedStudent) {
+        // Construct URL with query parameter
+        const url = `/api/studentBookings?student=${selectedStudent}`;
+
+        // Fetch booking data
+        fetch(url)
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return res.json();
+            })
+            .then(data => setStudentBookings(data))
+            .catch(err => console.error('Error fetching users:', err));
+      }
+    }, [selectedStudent]);
 
     //Fetch Coaches Data
     useEffect(() => {
@@ -42,7 +61,7 @@ const StudentPage: React.FC = () => {
     }, []);
 
 
-      //Fetch Coaches Data
+      //Fetch Student Data
       useEffect(() => {
         fetch('/api/students', 
           {
@@ -53,18 +72,6 @@ const StudentPage: React.FC = () => {
           .then(data => setStudents(data))
           .catch(err => console.error('Error fetching users:', err));
       }, []);
-    
-  
-    const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-      const selectedRole = event.target.value;
-      setRole(selectedRole);
-  
-      if (selectedRole === 'coach') {
-        router.push('/coachPage');
-      } else if (selectedRole === 'student') {
-        router.push('/studentPage');
-      }
-    };
 
     //Select Different Coach
     const handleCoachChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -75,6 +82,11 @@ const StudentPage: React.FC = () => {
   const handleStudentChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = event.target.value;
     setSelectedStudent(selected);
+}
+
+function getCoachPhoneNumber(coachName) {
+  const coach = coaches.find(coach => coach.name === coachName);
+  return coach ? coach.phoneNumber : 'N/A';
 }
 
 const handleBook = async (studentName, id) => {
@@ -102,97 +114,99 @@ const handleBook = async (studentName, id) => {
   }
 };
 
-  
-    return (
-      <div>
-        <div>
-            <h1>Student Page</h1>
-            <p>Welcome, Student!</p>
-        </div>
-        <label htmlFor="role">Select your role: </label>
-        <select id="role" value={role} onChange={handleChange}>
-          <option value="">--Choose a role--</option>
-          <option value="coach">Coach</option>
-          <option value="student">Student</option>
-        </select>
-
-        <div style={{ padding: '20px' }}>
-      
-
+  return (
+    <div className="container">
+      <div className="header">
         <h1>Student Page</h1>
-      <label htmlFor="student-select">Select which student you are:</label>
-      <select
-        id="student-select"
-        value={selectedStudent}
-        onChange={handleStudentChange}
-        style={{ marginLeft: '10px', padding: '5px' }}
-      >
-        <option value="">--Select a Student--</option>
-        {students.map((student) => (
-          <option>
-            {student.name}
-          </option>
-        ))}
-      </select>
-      {selectedStudent && <p>Selected Student: {selectedStudent}</p>}
-
-
-
-
-
-
-
-
-      <label htmlFor="coach-select">Select which coach you want to book with:</label>
-      <select
-        id="coach-select"
-        value={selectedCoach}
-        onChange={handleCoachChange}
-        style={{ marginLeft: '10px', padding: '5px' }}
-      >
-        <option value="">--Select a Coach--</option>
-        {coaches.map((coach) => (
-          <option>
-            {coach.name}
-          </option>
-        ))}
-      </select>
-      {selectedCoach && <p>Selected Coach: {selectedCoach}</p>}
-    </div>
-
-    <h1>Bookings for Coach: {selectedCoach}</h1>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Coach</th>
-                        <th>Student</th>
-                        <th>Date and Time</th>
-                        <th>Booked</th>
-                    </tr>
-                </thead>
-                <tbody>
-    {bookings.map((booking, index) => (
-        <tr key={index}>
-            <td>{booking.Coach}</td>
-            <td>{booking.Student}</td>
-            <td>{booking.DateTime}</td>
-            <td>
-                {booking.Booked ? (
-                    'Yes'
-                ) : (
-                    <>
-                        No
-                        <button onClick={() => handleBook(selectedStudent ,booking.id)}>Book</button>
-                    </>
-                )}
-            </td>
-        </tr>
-    ))}
-</tbody>
-                </table>
+        <p>Welcome, Student!</p>
       </div>
-      
-    );
-};
+
+      <Role/>
+  
+      <div className="form-group" style={{ padding: '20px' }}>
+        <h1>Student Page</h1>
+        <label htmlFor="student-select">Select which student you are:</label>
+        <select
+          id="student-select"
+          value={selectedStudent}
+          onChange={handleStudentChange}
+        >
+          <option value="">--Select a Student--</option>
+          {students.map((student) => (
+            <option key={student.id}>
+              {student.name}
+            </option>
+          ))}
+        </select>
+        <label htmlFor="coach-select">Select which coach you want to book with:</label>
+        <select
+          id="coach-select"
+          value={selectedCoach}
+          onChange={handleCoachChange}
+        >
+          <option value="">--Select a Coach--</option>
+          {coaches.map((coach) => (
+            <option key={coach.id}>
+              {coach.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <h1>Availability for Coach: {selectedCoach}</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Coach</th>
+            <th>Student</th>
+            <th>Date and Time</th>
+            <th>Booked</th>
+          </tr>
+        </thead>
+        <tbody>
+          {bookings.map((booking, index) => (
+            <tr key={index}>
+              <td>{booking.Coach}</td>
+              <td>{booking.Student}</td>
+              <td>{booking.DateTime}</td>
+              <td>
+                {booking.Booked ? (
+                  'Yes'
+                ) : (
+                  <>
+                    No
+                    <button onClick={() => handleBook(selectedStudent, booking.id)}>Book</button>
+                  </>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h1>{selectedStudent} Bookings</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Coach</th>
+            <th>Student</th>
+            <th>Date and Time</th>
+            <th>Coach Phone Number</th>
+          </tr>
+        </thead>
+        <tbody>
+          {studentBookings.map((booking, index) => (
+            <tr key={index}>
+              <td>{booking.Coach}</td>
+              <td>{booking.Student}</td>
+              <td>{booking.DateTime}</td>
+              <td>{getCoachPhoneNumber(booking.Coach)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 export default StudentPage;

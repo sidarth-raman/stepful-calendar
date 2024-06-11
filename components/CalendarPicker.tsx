@@ -10,7 +10,7 @@ interface CalendarPickerProps {
 const CalendarPicker: React.FC<CalendarPickerProps> = ({ selectedDate, onDateChange }) => {
     return ( 
         <div>
-            <h1>Hello Date Picker</h1>
+            <h1>Add Time Slots:</h1>
             <DatePicker
                 inline
                 selected={selectedDate}
